@@ -1,0 +1,13 @@
+memo = "9220f03d32cf31ffbf2e8cd5327b84af6e8bd9e747f5e74d2c769ca72dd9148c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/sync"
+  packages = ["syncmap"]
+  revision = "305c7b3edb4364a58141b30686a61a87bdb79a3a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/orcaman/concurrent-map"
+  packages = ["."]
+  revision = "2ae17bc4c860c83513ee50feb9746f3e50d7515d"
