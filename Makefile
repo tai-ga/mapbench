@@ -13,7 +13,7 @@ depup: ## dep ensure -update
 	dep ensure -update
 
 test: ## Test
-	go test -cpu 1,2,4,8,16 -count  5 -benchmem -bench .
+	go test -cpu 1,2,4 -count  5 -benchmem -bench .
 
 #stat: ## Benchmark statistics
 #	benchstat 1.log 2.log
