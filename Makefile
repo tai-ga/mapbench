@@ -13,6 +13,7 @@ depup: ## dep ensure -update
 	dep ensure -update
 
 test: ## Test
+	@go version
 	go test -cpu 1,2,4 -count  5 -benchmem -bench .
 
 #stat: ## Benchmark statistics
