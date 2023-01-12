@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/orcaman/concurrent-map"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 type CMap struct {
