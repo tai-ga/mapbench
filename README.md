@@ -1,118 +1,113 @@
 # Concurrent map benchmark
 
-```go
-func benchmark_Map(m Map, n int) {
-        var wg sync.WaitGroup
-
-        for i := 0; i < 4; i++ {
-                wg.Add(1)
-                go func() {
-                        defer wg.Done()
-                        for i := 0; i < n; i++ {
-                                m.Store(strconv.Itoa(i), i)
-                        }
-                }()
-
-                wg.Add(1)
-                go func() {
-                        defer wg.Done()
-                        for i := 0; i < n; i++ {
-                                m.Load(strconv.Itoa(i))
-                        }
-                }()
-        }
-        wg.Wait()
-
-        for i := 0; i < 4; i++ {
-                wg.Add(1)
-                go func() {
-                        defer wg.Done()
-                        for i := 0; i < n; i++ {
-                                m.Delete(strconv.Itoa(i))
-                        }
-                }()
-
-                wg.Add(1)
-                go func() {
-                        defer wg.Done()
-                        for i := 0; i < n; i++ {
-                                m.LoadOrStore(strconv.Itoa(i), i)
-                                m.LoadOrStore(strconv.Itoa(i), i)
-                        }
-                }()
-        }
-        wg.Wait()
-}
-```
-
 ## Result
+
 ```
-go version go1.16.5 darwin/amd64
+go version go1.19.5 darwin/arm64
 go test -cpu 1,2,4,8 -count  5 -benchmem -bench .
 goos: darwin
-goarch: amd64
+goarch: arm64
 pkg: github.com/tai-ga/mapbench
-cpu: Intel(R) Core(TM) i7-8559U CPU @ 2.70GHz
-Benchmark_Map/sync.RWMutex                362870              8321 ns/op             684 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex                380793              8070 ns/op             681 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex                390444              7983 ns/op             679 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex                392809              7667 ns/op             678 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex                409642              8195 ns/op             676 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-2              185540              8040 ns/op             677 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-2              174224              8597 ns/op             683 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-2              183075              8675 ns/op             679 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-2              226926              8554 ns/op             745 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-2              182582              8563 ns/op             678 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-4              176948              7282 ns/op             681 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-4              179995              6969 ns/op             679 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-4              185884              6933 ns/op             677 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-4              190986              7282 ns/op             675 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-4              185503              8129 ns/op             677 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-8              170602              8602 ns/op             684 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-8              171357              8328 ns/op             684 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-8              174945              8106 ns/op             682 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-8              178005              8123 ns/op             681 B/op         52 allocs/op
-Benchmark_Map/sync.RWMutex-8              146167              7927 ns/op             701 B/op         51 allocs/op
-Benchmark_Map/sync.Map                    360312              8283 ns/op             786 B/op         59 allocs/op
-Benchmark_Map/sync.Map                    352556              8750 ns/op             888 B/op         59 allocs/op
-Benchmark_Map/sync.Map                    332758              8043 ns/op             783 B/op         59 allocs/op
-Benchmark_Map/sync.Map                    345384              8446 ns/op             858 B/op         59 allocs/op
-Benchmark_Map/sync.Map                    322189              9122 ns/op             986 B/op         60 allocs/op
-Benchmark_Map/sync.Map-2                  306418              4450 ns/op             833 B/op         59 allocs/op
-Benchmark_Map/sync.Map-2                  444670              6073 ns/op             984 B/op         59 allocs/op
-Benchmark_Map/sync.Map-2                  363121              6159 ns/op            1013 B/op         60 allocs/op
-Benchmark_Map/sync.Map-2                  347695              4313 ns/op             786 B/op         59 allocs/op
-Benchmark_Map/sync.Map-2                  422526              5420 ns/op             866 B/op         59 allocs/op
-Benchmark_Map/sync.Map-4                  343027              5545 ns/op            1060 B/op         60 allocs/op
-Benchmark_Map/sync.Map-4                  367998              3355 ns/op             793 B/op         59 allocs/op
-Benchmark_Map/sync.Map-4                  515540              5128 ns/op            1013 B/op         59 allocs/op
-Benchmark_Map/sync.Map-4                  409647              3880 ns/op             840 B/op         59 allocs/op
-Benchmark_Map/sync.Map-4                  320163              5538 ns/op            1058 B/op         59 allocs/op
-Benchmark_Map/sync.Map-8                  509028              4226 ns/op             891 B/op         59 allocs/op
-Benchmark_Map/sync.Map-8                  334224              3928 ns/op             844 B/op         59 allocs/op
-Benchmark_Map/sync.Map-8                  306444              3980 ns/op             854 B/op         59 allocs/op
-Benchmark_Map/sync.Map-8                  508755              5687 ns/op            1070 B/op         59 allocs/op
-Benchmark_Map/sync.Map-8                  377551              6024 ns/op            1047 B/op         59 allocs/op
-Benchmark_Map/concurrent-map              440830              5768 ns/op             755 B/op         52 allocs/op
-Benchmark_Map/concurrent-map              392472              5648 ns/op             677 B/op         52 allocs/op
-Benchmark_Map/concurrent-map              402418              5466 ns/op             676 B/op         52 allocs/op
-Benchmark_Map/concurrent-map              403568              5686 ns/op             675 B/op         52 allocs/op
-Benchmark_Map/concurrent-map              409058              5393 ns/op             675 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-2            672831              2469 ns/op             694 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-2            674583              2466 ns/op             693 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-2            679269              2446 ns/op             693 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-2            640879              2460 ns/op             699 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-2            686034              2534 ns/op             692 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-4            987357              1661 ns/op             738 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-4            729748              1781 ns/op             686 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-4            888522              1820 ns/op             756 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-4            848949              1892 ns/op             675 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-4            864320              1864 ns/op             761 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-8            841507              1779 ns/op             676 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-8            772796              1842 ns/op             682 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-8            726567              1876 ns/op             687 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-8            717614              1858 ns/op             688 B/op         52 allocs/op
-Benchmark_Map/concurrent-map-8            804320              1797 ns/op             679 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex                400476              3048 ns/op             677 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex                749340              3617 ns/op             685 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex                757352              3826 ns/op             683 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex                691563              3754 ns/op             691 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex                763464              3630 ns/op             683 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-2              405060              3718 ns/op             676 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-2              385776              3839 ns/op             680 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-2              353296              3450 ns/op             687 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-2              414694              4012 ns/op             675 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-2              357106              3719 ns/op             685 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-4              351477              3905 ns/op             687 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-4              376802              4542 ns/op             681 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-4              407166              4199 ns/op             676 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-4              410596              4488 ns/op             675 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-4              317052              4976 ns/op             697 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-8              281151              4099 ns/op             713 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-8              305932              4450 ns/op             702 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-8              283983              4295 ns/op             711 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-8              326572              3999 ns/op             694 B/op         52 allocs/op
+Benchmark_Map/sync.RWMutex-8              320192              4338 ns/op             696 B/op         52 allocs/op
+Benchmark_Map/sync.Map                    669997              4136 ns/op             857 B/op         59 allocs/op
+Benchmark_Map/sync.Map                    662700              4187 ns/op             851 B/op         59 allocs/op
+Benchmark_Map/sync.Map                    655581              4040 ns/op             847 B/op         59 allocs/op
+Benchmark_Map/sync.Map                    685515              4268 ns/op             864 B/op         59 allocs/op
+Benchmark_Map/sync.Map                    698823              4527 ns/op             903 B/op         59 allocs/op
+Benchmark_Map/sync.Map-2                  695235              2899 ns/op             826 B/op         59 allocs/op
+Benchmark_Map/sync.Map-2                  834380              3234 ns/op             835 B/op         59 allocs/op
+Benchmark_Map/sync.Map-2                  693541              3957 ns/op             954 B/op         60 allocs/op
+Benchmark_Map/sync.Map-2                  646026              3336 ns/op             896 B/op         59 allocs/op
+Benchmark_Map/sync.Map-2                  733927              3379 ns/op             809 B/op         59 allocs/op
+Benchmark_Map/sync.Map-4                  760915              3380 ns/op             959 B/op         59 allocs/op
+Benchmark_Map/sync.Map-4                  882100              2786 ns/op             891 B/op         59 allocs/op
+Benchmark_Map/sync.Map-4                  814069              2952 ns/op             855 B/op         59 allocs/op
+Benchmark_Map/sync.Map-4                  888970              3111 ns/op             905 B/op         59 allocs/op
+Benchmark_Map/sync.Map-4                  854244              2853 ns/op             920 B/op         59 allocs/op
+Benchmark_Map/sync.Map-8                  730062              3444 ns/op             875 B/op         59 allocs/op
+Benchmark_Map/sync.Map-8                  699572              2734 ns/op             865 B/op         59 allocs/op
+Benchmark_Map/sync.Map-8                  768628              3026 ns/op             847 B/op         59 allocs/op
+Benchmark_Map/sync.Map-8                  460105              2545 ns/op             943 B/op         60 allocs/op
+Benchmark_Map/sync.Map-8                  636290              2792 ns/op             868 B/op         59 allocs/op
+Benchmark_Map/concurrent-map              644538              2924 ns/op             698 B/op         52 allocs/op
+Benchmark_Map/concurrent-map              701340              3166 ns/op             690 B/op         52 allocs/op
+Benchmark_Map/concurrent-map              606000              2909 ns/op             706 B/op         52 allocs/op
+Benchmark_Map/concurrent-map              698432              3121 ns/op             690 B/op         52 allocs/op
+Benchmark_Map/concurrent-map              693860              2915 ns/op             691 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-2            900393              1632 ns/op             753 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-2           1000000              1676 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-2            889299              1624 ns/op             756 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-2            945927              1701 ns/op             745 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-2           1000000              1645 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-4           1000000              1065 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-4           1000000              1084 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-4           1000000              1098 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-4           1000000              1103 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-4           1000000              1086 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-8           1000000              1128 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-8           1000000              1126 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-8           1000000              1102 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-8           1000000              1081 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map-8           1000000              1097 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2             688249              2996 ns/op             694 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2             695569              3132 ns/op             690 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2             701654              3098 ns/op             690 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2             656288              3099 ns/op             696 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2             693354              2994 ns/op             691 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-2           955591              1719 ns/op             743 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-2           956334              1659 ns/op             743 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-2           920841              1612 ns/op             749 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-2          1000000              1686 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-2           963468              1676 ns/op             742 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-4          1000000              1084 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-4          1000000              1071 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-4          1000000              1132 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-4          1000000              1084 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-4          1000000              1100 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-8          1000000              1097 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-8          1000000              1100 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-8          1000000              1095 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-8          1000000              1138 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2-8          1000000              1124 ns/op             736 B/op         52 allocs/op
+Benchmark_Map/concurrent-map2APIv2        874141              2792 ns/op             439 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2        890276              2795 ns/op             435 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2        933645              2771 ns/op             427 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2        830718              2567 ns/op             356 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2        936511              2765 ns/op             427 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-2     1000000              1419 ns/op             416 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-2     1000000              1334 ns/op             416 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-2     1000000              1428 ns/op             416 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-2     1000000              1382 ns/op             416 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-2     1000000              1398 ns/op             416 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-4     1301401               924.7 ns/op           379 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-4     1349997               973.6 ns/op           375 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-4     1327069               951.7 ns/op           377 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-4     1335458               919.5 ns/op           376 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-4     1399525               939.9 ns/op           372 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-8     1308805               906.1 ns/op           378 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-8     1296559               913.4 ns/op           379 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-8     1295713               902.8 ns/op           379 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-8     1343952               904.3 ns/op           375 B/op         32 allocs/op
+Benchmark_Map/concurrent-map2APIv2-8     1306411               899.7 ns/op           378 B/op         32 allocs/op
 PASS
-ok      github.com/tai-ga/mapbench      118.578s
+ok      github.com/tai-ga/mapbench      184.397s
 ```
