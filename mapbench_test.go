@@ -18,7 +18,7 @@ func NewCMap() *CMap {
 	return c
 }
 
-func toString(key interface{}) string {
+func toString(key any) string {
 	k, ok := key.(string)
 	if ok {
 		return k
@@ -26,35 +26,35 @@ func toString(key interface{}) string {
 	return ""
 }
 
-func (c *CMap) Delete(key interface{}) {
+func (c *CMap) Delete(key any) {
 	c.m.Remove(toString(key))
 }
 
-func (c *CMap) Load(key interface{}) (value interface{}, ok bool) {
+func (c *CMap) Load(key any) (value any, ok bool) {
 	return c.m.Get(toString(key))
 }
 
-func (c *CMap) LoadOrStore(key, value interface{}) (actual interface{}, loaded bool) {
+func (c *CMap) LoadOrStore(key, value any) (actual any, loaded bool) {
 	ok := c.m.SetIfAbsent(toString(key), value)
 	return value, ok
 }
 
-func (c *CMap) Range(f func(key, value interface{}) bool) {
-	c.m.IterCb(func(k string, v interface{}) {
+func (c *CMap) Range(f func(key, value any) bool) {
+	c.m.IterCb(func(k string, v any) {
 		f(k, v)
 	})
 }
 
-func (c *CMap) Store(key, value interface{}) {
+func (c *CMap) Store(key, value any) {
 	c.m.Set(toString(key), value)
 }
 
 type RWMutexMap struct {
-	m  map[interface{}]interface{}
+	m  map[any]any
 	mu sync.RWMutex
 }
 
-func (m *RWMutexMap) Delete(key interface{}) {
+func (m *RWMutexMap) Delete(key any) {
 	_, ok := m.Load(key)
 	if !ok {
 		return
@@ -64,9 +64,9 @@ func (m *RWMutexMap) Delete(key interface{}) {
 	m.mu.Unlock()
 }
 
-func (m *RWMutexMap) Load(key interface{}) (value interface{}, ok bool) {
+func (m *RWMutexMap) Load(key any) (value any, ok bool) {
 	if m.m == nil {
-		m.m = make(map[interface{}]interface{})
+		m.m = make(map[any]any)
 	}
 
 	m.mu.RLock()
@@ -75,7 +75,7 @@ func (m *RWMutexMap) Load(key interface{}) (value interface{}, ok bool) {
 	return v, ok
 }
 
-func (m *RWMutexMap) LoadOrStore(key, value interface{}) (actual interface{}, loaded bool) {
+func (m *RWMutexMap) LoadOrStore(key, value any) (actual any, loaded bool) {
 	v, ok := m.Load(key)
 	if ok {
 		return v, true
@@ -84,9 +84,9 @@ func (m *RWMutexMap) LoadOrStore(key, value interface{}) (actual interface{}, lo
 	return value, false
 }
 
-func (m *RWMutexMap) Range(f func(key, value interface{}) bool) {
+func (m *RWMutexMap) Range(f func(key, value any) bool) {
 	if m.m == nil {
-		m.m = make(map[interface{}]interface{})
+		m.m = make(map[any]any)
 	}
 
 	m.mu.RLock()
@@ -98,9 +98,9 @@ func (m *RWMutexMap) Range(f func(key, value interface{}) bool) {
 	m.mu.RUnlock()
 }
 
-func (m *RWMutexMap) Store(key, value interface{}) {
+func (m *RWMutexMap) Store(key, value any) {
 	if m.m == nil {
-		m.m = make(map[interface{}]interface{})
+		m.m = make(map[any]any)
 	}
 
 	m.mu.Lock()
@@ -109,11 +109,11 @@ func (m *RWMutexMap) Store(key, value interface{}) {
 }
 
 type Map interface {
-	Delete(key interface{})
-	Load(key interface{}) (value interface{}, ok bool)
-	LoadOrStore(key, value interface{}) (actual interface{}, loaded bool)
-	Range(f func(key, value interface{}) bool)
-	Store(key, value interface{})
+	Delete(key any)
+	Load(key any) (value any, ok bool)
+	LoadOrStore(key, value any) (actual any, loaded bool)
+	Range(f func(key, value any) bool)
+	Store(key, value any)
 }
 
 func benchmark_Map(m Map, n int) {
