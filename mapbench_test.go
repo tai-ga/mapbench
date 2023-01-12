@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	cmap "github.com/orcaman/concurrent-map"
+	cmap2 "github.com/orcaman/concurrent-map/v2"
 )
 
 type apiVersion int
@@ -36,6 +37,8 @@ type MapAPIv2 interface {
 var _ MapAPIv1 = (*sync.Map)(nil)
 var _ MapAPIv1 = (*RWMutexMap)(nil)
 var _ MapAPIv1 = (*CMap)(nil)
+var _ MapAPIv1 = (*CMap2)(nil)
+var _ MapAPIv2 = (*CMap2)(nil)
 
 type CMap struct {
 	m cmap.ConcurrentMap
@@ -76,6 +79,63 @@ func (c *CMap) Range(f func(key, value any) bool) {
 
 func (c *CMap) Store(key, value any) {
 	c.m.Set(toString(key), value)
+}
+
+// CMap2 is Version 2 of orcaman/concurrent-map
+type CMap2 struct {
+	m cmap2.ConcurrentMap[string, any]
+}
+
+func NewCMap2() *CMap2 {
+	c := new(CMap2)
+	c.m = cmap2.New[any]()
+	return c
+}
+
+func (c *CMap2) Delete(key any) {
+	c.m.Remove(toString(key))
+}
+
+func (c *CMap2) Load(key any) (value any, ok bool) {
+	return c.m.Get(toString(key))
+}
+
+func (c *CMap2) LoadOrStore(key, value any) (actual any, loaded bool) {
+	ok := c.m.SetIfAbsent(toString(key), value)
+	return value, ok
+}
+
+func (c *CMap2) Range(f func(key, value any) bool) {
+	c.m.IterCb(func(k string, v any) {
+		f(k, v)
+	})
+}
+
+func (c *CMap2) Store(key, value any) {
+	c.m.Set(toString(key), value)
+}
+
+func (c *CMap2) Delete2(key string) {
+	c.m.Remove(key)
+}
+
+func (c *CMap2) Load2(key string) (value any, ok bool) {
+	return c.m.Get(key)
+}
+
+func (c *CMap2) LoadOrStore2(key string, value any) (actual any, loaded bool) {
+	ok := c.m.SetIfAbsent(key, value)
+	return value, ok
+}
+
+func (c *CMap2) Range2(f func(key string, value any) bool) {
+	c.m.IterCb(func(k string, v any) {
+		f(k, v)
+	})
+}
+
+func (c *CMap2) Store2(key string, value any) {
+	c.m.Set(key, value)
 }
 
 type RWMutexMap struct {
