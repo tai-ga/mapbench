@@ -199,15 +199,26 @@ func (m *RWMutexMap) Store(key, value any) {
 	m.mu.Unlock()
 }
 
-func benchmark_Map(m Map, n int) {
+// benchmark_Map is the main of the benchmark
+func benchmark_Map(m MapAPIv1, apiv apiVersion, n int) {
 	var wg sync.WaitGroup
+
+	m2, okv2 := m.(MapAPIv2)
+	if apiv == mapAPIv2 && !okv2 {
+		panic(m)
+	}
 
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for i := 0; i < n; i++ {
-				m.Store(strconv.Itoa(i), i)
+				switch apiv {
+				case mapAPIv1:
+					m.Store(strconv.Itoa(i), i)
+				case mapAPIv2:
+					m2.Store2(strconv.Itoa(i), i)
+				}
 			}
 		}()
 
@@ -215,7 +226,12 @@ func benchmark_Map(m Map, n int) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < n; i++ {
-				m.Load(strconv.Itoa(i))
+				switch apiv {
+				case mapAPIv1:
+					m.Load(strconv.Itoa(i))
+				case mapAPIv2:
+					m2.Load2(strconv.Itoa(i))
+				}
 			}
 		}()
 	}
@@ -226,7 +242,12 @@ func benchmark_Map(m Map, n int) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < n; i++ {
-				m.Delete(strconv.Itoa(i))
+				switch apiv {
+				case mapAPIv1:
+					m.Delete(strconv.Itoa(i))
+				case mapAPIv2:
+					m2.Delete2(strconv.Itoa(i))
+				}
 			}
 		}()
 
@@ -234,8 +255,14 @@ func benchmark_Map(m Map, n int) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < n; i++ {
-				m.LoadOrStore(strconv.Itoa(i), i)
-				m.LoadOrStore(strconv.Itoa(i), i)
+				switch apiv {
+				case mapAPIv1:
+					m.LoadOrStore(strconv.Itoa(i), i)
+					m.LoadOrStore(strconv.Itoa(i), i)
+				case mapAPIv2:
+					m2.LoadOrStore2(strconv.Itoa(i), i)
+					m2.LoadOrStore2(strconv.Itoa(i), i)
+				}
 			}
 		}()
 	}
@@ -246,18 +273,30 @@ func Benchmark_Map(b *testing.B) {
 	b.Run("sync.RWMutex", func(b *testing.B) {
 		m := new(RWMutexMap)
 		b.ResetTimer()
-		benchmark_Map(m, b.N)
+		benchmark_Map(m, mapAPIv1, b.N)
 	})
 
 	b.Run("sync.Map", func(b *testing.B) {
 		m := new(sync.Map)
 		b.ResetTimer()
-		benchmark_Map(m, b.N)
+		benchmark_Map(m, mapAPIv1, b.N)
 	})
 
 	b.Run("concurrent-map", func(b *testing.B) {
 		m := NewCMap()
 		b.ResetTimer()
-		benchmark_Map(m, b.N)
+		benchmark_Map(m, mapAPIv1, b.N)
+	})
+
+	b.Run("concurrent-map2", func(b *testing.B) {
+		m := NewCMap2()
+		b.ResetTimer()
+		benchmark_Map(m, mapAPIv1, b.N)
+	})
+
+	b.Run("concurrent-map2APIv2", func(b *testing.B) {
+		m := NewCMap2()
+		b.ResetTimer()
+		benchmark_Map(m, mapAPIv2, b.N)
 	})
 }
