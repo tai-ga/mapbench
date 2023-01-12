@@ -40,6 +40,7 @@ var _ MapAPIv1 = (*CMap)(nil)
 var _ MapAPIv1 = (*CMap2)(nil)
 var _ MapAPIv2 = (*CMap2)(nil)
 
+// CMap is Version 1 of orcaman/concurrent-map
 type CMap struct {
 	m cmap.ConcurrentMap
 }
@@ -138,6 +139,7 @@ func (c *CMap2) Store2(key string, value any) {
 	c.m.Set(key, value)
 }
 
+// RWMutexMap is implemented using sync.RWMutex
 type RWMutexMap struct {
 	m  map[any]any
 	mu sync.RWMutex
