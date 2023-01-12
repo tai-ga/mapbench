@@ -8,6 +8,35 @@ import (
 	cmap "github.com/orcaman/concurrent-map"
 )
 
+type apiVersion int
+
+const (
+	mapAPIv1 apiVersion = iota + 1
+	mapAPIv2
+)
+
+// MapAPIv1 is the same API as sync.Map
+type MapAPIv1 interface {
+	Delete(key any)
+	Load(key any) (value any, ok bool)
+	LoadOrStore(key, value any) (actual any, loaded bool)
+	Range(f func(key, value any) bool)
+	Store(key, value any)
+}
+
+// MapAPIv2 is implementation using Generics
+type MapAPIv2 interface {
+	Delete2(key string)
+	Load2(key string) (value any, ok bool)
+	LoadOrStore2(key string, value any) (actual any, loaded bool)
+	Range2(f func(key string, value any) bool)
+	Store2(key string, value any)
+}
+
+var _ MapAPIv1 = (*sync.Map)(nil)
+var _ MapAPIv1 = (*RWMutexMap)(nil)
+var _ MapAPIv1 = (*CMap)(nil)
+
 type CMap struct {
 	m cmap.ConcurrentMap
 }
