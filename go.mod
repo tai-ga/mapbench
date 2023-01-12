@@ -1,5 +1,8 @@
 module github.com/tai-ga/mapbench
 
-go 1.16
+go 1.19
 
-require github.com/orcaman/concurrent-map v0.0.0-20210501183033-44dafcb38ecc
+require (
+	github.com/orcaman/concurrent-map v1.0.0
+	github.com/orcaman/concurrent-map/v2 v2.0.1
+)
