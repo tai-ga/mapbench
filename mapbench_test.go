@@ -40,6 +40,14 @@ var _ MapAPIv1 = (*CMap)(nil)
 var _ MapAPIv1 = (*CMap2)(nil)
 var _ MapAPIv2 = (*CMap2)(nil)
 
+func toString(key any) string {
+	k, ok := key.(string)
+	if ok {
+		return k
+	}
+	return ""
+}
+
 // CMap is Version 1 of orcaman/concurrent-map
 type CMap struct {
 	m cmap.ConcurrentMap
@@ -49,14 +57,6 @@ func NewCMap() *CMap {
 	c := new(CMap)
 	c.m = cmap.New()
 	return c
-}
-
-func toString(key any) string {
-	k, ok := key.(string)
-	if ok {
-		return k
-	}
-	return ""
 }
 
 func (c *CMap) Delete(key any) {
@@ -197,14 +197,6 @@ func (m *RWMutexMap) Store(key, value any) {
 	m.mu.Lock()
 	m.m[key] = value
 	m.mu.Unlock()
-}
-
-type Map interface {
-	Delete(key any)
-	Load(key any) (value any, ok bool)
-	LoadOrStore(key, value any) (actual any, loaded bool)
-	Range(f func(key, value any) bool)
-	Store(key, value any)
 }
 
 func benchmark_Map(m Map, n int) {
